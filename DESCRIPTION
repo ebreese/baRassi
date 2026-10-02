@@ -1,0 +1,27 @@
+Package: baRassi
+Type: Package
+Title: Advanced Data for AFL and AFLW (Title Case)
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Emlyn", "Breese",
+      email = "barassi@charting.football.com",
+      comment = c(X = "@emlynbreese",
+      Website = "https://charting.football"),
+      role = c("aut", "cre")
+    )
+  )
+Description: This package seeks to provide convenient access to a range of AFL/AFLW metrics and functions I have developed.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+LazyData: true
+Imports: 
+    dplyr,
+    httr,
+    jsonlite,
+    lubridate,
+    rlang,
+    tidyr,
+    usethis
+Config/roxygen2/version: 8.1.0
