@@ -273,7 +273,7 @@ fetch_statfeed <- function(matchId) {
 
     dplyr::mutate(
       chainStart = dplyr::case_when(
-        .data$description == "stoppageClearance" ~ "stoppage",
+        .data$description %in% c("stoppageClearance","centreClearance") ~ "clearance",
 
         .data$description == "kickIn" ~ "kickIn",
 
@@ -294,8 +294,25 @@ fetch_statfeed <- function(matchId) {
           "possGain",
 
         TRUE ~ NA_character_
-      )
-    )
+      )) |>
+      dplyr::mutate(chainEnd = dplyr::case_when(
+        dplyr::lead(.data$chainStart) == "possGain" ~ "turnover",
+        dplyr::lead(.data$chainStart) == "clearance" ~ "clearance",
+        .data$shotAtGoal == "goal" ~ "goal",
+        .data$shotAtGoal == "behind" ~ "behind",
+        dplyr::lead(.data$description) == "kickIn" ~ "rushed",
+        dplyr::lead(.data$chainStart) == "OOBFree" ~ "OOBFree",
+        dplyr::lead(.data$chainStart) == "stoppage" ~ "stoppage",
+        dplyr::lead(.data$possGain) ~ "turnover",
+        is.na(dplyr::lead(.data$description)) ~ "quarterEnd",
+        TRUE ~ NA_character_ )
+      ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(chainNumber = cumsum(!is.na(.data$chainStart))) |>
+    dplyr::group_by(.data$matchId,.data$chainNumber) |>
+    dplyr::mutate(chainStart = dplyr::first(.data$chainStart),
+                  chainEnd = dplyr::last(.data$chainEnd))
+
 
   return(statFeed)
 }
