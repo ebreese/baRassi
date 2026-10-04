@@ -2,4 +2,5 @@
 
 export(fetch_statfeed)
 export(fetch_stats_aflw)
+export(get_next_i50_data)
 importFrom(rlang,.data)

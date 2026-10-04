@@ -99,6 +99,7 @@ fetch_statfeed <- function(matchId) {
     )
   )
 
+  print(matchInfo)
   year <- lubridate::year(
     json_data$report$matchInfo$utcStartTime
   )
@@ -235,6 +236,7 @@ fetch_statfeed <- function(matchId) {
       period = .data$period,
       periodSeconds = .data$periodSeconds,
       team = .data$team,
+      opponent = dplyr::if_else(.data$team == .data$homeTeam,.data$awayTeam,.data$homeTeam),
       displayName = .data$displayName,
       description = .data$description,
       possession = .data$possession,

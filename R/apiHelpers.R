@@ -42,3 +42,10 @@ get_season_rounds <- function(seasonId)
   rounds <- rounds$rounds
   return(rounds)
 }
+
+get_stats_by_period <- function(matchId,period)
+{
+  url <- paste0("https://api.afl.com.au/cfs/afl/matchStats/",matchId,"/period/",period)
+  rawData <- access_api(url)
+  return(rawData)
+}
