@@ -42,7 +42,7 @@ get_i50_r50 <- function(statFeed)
 {
   qtrByQtrStats <- get_i50_by_period(statFeed)
 
-  i50Flags <<- statFeed |>
+  i50Flags <- statFeed |>
     dplyr::select(matchId,team,opponent,period,periodSeconds,description,shotAtGoal) |>
     dplyr::filter(description %in% c("rebound50","kickIn") |
                     (!is.na(shotAtGoal) & shotAtGoal == "goal")) |>
@@ -61,7 +61,7 @@ get_i50_r50 <- function(statFeed)
                                    periodSeconds)) |>
     dplyr::select(-tempTeam)
 
-  inferredI50s <<- i50Flags |>
+  inferredI50s <- i50Flags |>
     dplyr::mutate(tempTeam = team) |>
     dplyr::mutate(team = dplyr::if_else(description == "rebound50",
                           opponent,
@@ -74,7 +74,7 @@ get_i50_r50 <- function(statFeed)
     dplyr::mutate(description = "inside50")
 
 
-  i50R50List <<- dplyr::bind_rows(i50Flags,inferredI50s) |>
+  i50R50List <- dplyr::bind_rows(i50Flags,inferredI50s) |>
     dplyr::arrange(matchId,period,periodSeconds) |>
     dplyr::group_by(matchId,period) |>
     dplyr::filter(description != "shotAtGoal")
@@ -87,7 +87,7 @@ get_i50_r50 <- function(statFeed)
 #    dplyr::select(-flagToRemove)
 
   print(colnames(qtrByQtrStats))
-  missingI50s <<- i50R50List |>
+  missingI50s <- i50R50List |>
     dplyr::group_by(matchId,team,period,opponent) |>
     dplyr::summarise(i50Inferred = sum(description == "inside50")) |>
     dplyr::left_join(qtrByQtrStats |>
