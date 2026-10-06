@@ -42,9 +42,10 @@ get_i50_r50 <- function(statFeed)
 {
   qtrByQtrStats <- get_i50_by_period(statFeed)
 
-  i50Flags <- statFeed |>
-    dplyr::select(matchId,team,opponent,period,periodSeconds,description) |>
-    dplyr::filter(description %in% c("rebound50","goal","kickIn")) |>
+  i50Flags <<- statFeed |>
+    dplyr::select(matchId,team,opponent,period,periodSeconds,description,shotAtGoal) |>
+    dplyr::filter(description %in% c("rebound50","kickIn") |
+                    (!is.na(shotAtGoal) & shotAtGoal == "goal")) |>
     dplyr::mutate(tempTeam = team) |>
     dplyr::mutate(team = dplyr::if_else(description == "kickIn",
                               opponent,
@@ -60,7 +61,7 @@ get_i50_r50 <- function(statFeed)
                                    periodSeconds)) |>
     dplyr::select(-tempTeam)
 
-  inferredI50s <- i50Flags |>
+  inferredI50s <<- i50Flags |>
     dplyr::mutate(tempTeam = team) |>
     dplyr::mutate(team = dplyr::if_else(description == "rebound50",
                           opponent,
@@ -73,19 +74,20 @@ get_i50_r50 <- function(statFeed)
     dplyr::mutate(description = "inside50")
 
 
-  i50R50List <- dplyr::bind_rows(i50Flags,inferredI50s) |>
+  i50R50List <<- dplyr::bind_rows(i50Flags,inferredI50s) |>
     dplyr::arrange(matchId,period,periodSeconds) |>
     dplyr::group_by(matchId,period) |>
-    dplyr::mutate(flagToRemove =
-             !is.na(lag(description)) &
-             description == "inside50" &
-             lag(description) == "behind" &
-             team == lag(team)) |>
-    dplyr::filter(!flagToRemove) |>
-    dplyr::select(-flagToRemove)
+    dplyr::filter(description != "shotAtGoal")
+    # dplyr::mutate(flagToRemove =
+    #          !is.na(lag(description)) &
+    #          description == "inside50" &
+    #          shotAtGoal %in% c("behind","goal") &
+    #          team == lag(team)) |>
+#    dplyr::filter(!flagToRemove) |>
+#    dplyr::select(-flagToRemove)
 
   print(colnames(qtrByQtrStats))
-  missingI50s <- i50R50List |>
+  missingI50s <<- i50R50List |>
     dplyr::group_by(matchId,team,period,opponent) |>
     dplyr::summarise(i50Inferred = sum(description == "inside50")) |>
     dplyr::left_join(qtrByQtrStats |>
@@ -114,7 +116,7 @@ get_i50_r50 <- function(statFeed)
   i50R50List <- i50R50List |>
     rbind(missingI50s,quarterEnd) |>
     dplyr::arrange(matchId,period,periodSeconds,desc(description)) |>
-    dplyr::select(matchId,period,periodSeconds,team,description,opponent)
+    dplyr::select(matchId,period,periodSeconds,team,description,opponent,shotAtGoal)
 
   return(i50R50List)
 }
@@ -143,8 +145,8 @@ get_next_i50_data <- function(statFeed)
               team = dplyr::first(team),
               opponent = dplyr::first(opponent),
               rebounded = any(description == "rebound50"),
-              goal = any(description == "goal"),
-              score = any(description %in% c("goal","behind"))) |>
+              goal = any(!is.na(shotAtGoal) & shotAtGoal == "goal"),
+              score = any(!is.na(shotAtGoal) & shotAtGoal %in% c("goal","behind"))) |>
     dplyr::group_by(matchId,period) |>
     dplyr::mutate(nextI50 = dplyr::lead(team))
 
