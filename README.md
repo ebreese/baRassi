@@ -10,8 +10,13 @@ Then load the package via:
 
 library(baRassi)
 
+At the moment you should also load the fitzRoy package, because I forgot to add a required import in for one function I'm calling from it
 
-Currently three functions available
+install.packages("fitzRoy")
+library(fitzRoy)
+
+
+Currently three functions available in baRassi
 
 
 fetch_stats_aflw(comp="AFLW", season = NA, round = NA)
