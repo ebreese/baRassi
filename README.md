@@ -27,7 +27,7 @@ fetch_stats_aflw(comp="AFLW", season = NA, round = NA)
 - Currently I have a script that grabs the season totals every monday, then uses each the record of previous season totals to derive match by match data.
 - That then gets shipped off to a public repo and stored in a file per round
 
-fetch_stat_feed_afl(matchId)
+fetch_statfeed(matchId)
 - Grabs the stat feed for a given AFLW match. This data is available for 2025 and 2026
 - The matchId is in the Champion Data format, e.g. "CD_M20262640301"
 - CD_M - prefix for match Ids
